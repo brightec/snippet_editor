@@ -1,0 +1,5 @@
+name = Snippet editor
+description = A editor that allows trusted users to edit snippets.
+dependencies[] = snippet
+package = Brightec
+core = 7.x

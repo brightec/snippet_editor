@@ -1,0 +1,20 @@
+Drupal 7 Snippet Editor
+-----------------------
+
+This module supplements the Snippet module and adds a Snippet administration section where users with valid permissions can edit snippets.
+
+Notes
+-----
+
+This module does support filter formats but has been disabled. I may add a configuration screen in the future to change this setting.
+
+Inline snippets are not supported at this time. Support may be added in a future release.
+
+Usage
+-----
+
+Just add the module to your project. Make sure you have the Snippet module installed first. Go to the Permission editor and enable the Administer Snippets permission and the individual snippet edit permissions.
+
+Now just visit Structure -> Snippets and you will see a list of snippets you can edit.
+
+Enjoy.

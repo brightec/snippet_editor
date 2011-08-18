@@ -1,0 +1,99 @@
+<?php
+/**
+ * @file
+ * This is the file description for Snippet Editor module.
+ */
+
+/**
+ * Implements hook_permission().
+ */
+function snippet_editor_permission() {
+	$permissions = array();
+
+	$permissions['administer snippets'] = array(
+		'title' => t('Administer snippets'),
+		'description' => t('This permission is required if you want to give roles permission to edit snippets.<em>You must also set the indivdual snippet permissions below.</em>'),		
+	);
+	
+  foreach (snippet_block::load_all() as $sb) {
+
+	  $permissions[_snippet_editor_permission_name($sb->file->filename)] = array(
+	      'title' => t('<em>' . _snippet_editor_machine_name($sb->file->filename) . '</em>: Edit content'),
+	    );
+	}
+	
+	return $permissions;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function snippet_editor_menu() {
+	$items = array();
+	
+  $items['admin/structure/snippets'] = array(
+    'title' => 'Snippets',
+		'description' => 'Edit snippets.',
+    'page callback' => 'snippet_list',
+    'access arguments' => array('administer snippets'),
+    'file' => 'snippet_editor.admin.inc',
+  );
+
+	$items['admin/structure/snippets/%/%/edit'] = array(
+	  'title' => 'Edit snippet',
+    'page callback' => 'drupal_get_form',
+		'page arguments' => array('snippet_edit_form', 3,4),
+    'access callback' => 'snippet_editor_set_edit_access',		
+	  'access arguments' => array(3, 4),
+	  'file' => 'snippet_editor.admin.inc',
+	);
+
+  return $items;
+}
+
+/**
+ * Access callback for editing a snippet.
+ *
+ * @param string $module
+ *   (optional) The shortcut set to be edited. If not set, the current user's
+ *   shortcut set will be used.
+ *
+ *
+ * @param string $snippet_machine_name
+ *   (optional) The shortcut set to be edited. If not set, the current user's
+ *   shortcut set will be used.
+ *
+ * @return
+ *   TRUE if the current user has access to edit the snippet, FALSE
+ *   otherwise.
+ */
+function snippet_editor_set_edit_access($module, $snippet_machine_name) {
+	$sb = _snippet_editor_get_snippet_object_for_filename($module, $snippet_machine_name);	
+	
+  if ($sb && user_access('administer snippets') && user_access(_snippet_editor_permission_name($sb->file->filename))) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+function _snippet_editor_machine_name($filename) {
+	return substr($filename, 0, strrpos($filename, '.'));	
+}
+
+function _snippet_editor_permission_name($filename) {
+	return 'edit ' . _snippet_editor_machine_name($filename) . ' snippet';
+}
+
+function _snippet_editor_machine_name_to_filename($machine_name) {
+	return $machine_name . '.html';
+}
+
+function _snippet_editor_get_snippet_object_for_filename($module, $machine_name) {
+ 	foreach (snippet_block::load_all() as $sb) {
+		if($sb->module == $module && $sb->file->filename == _snippet_editor_machine_name_to_filename($machine_name)) {
+			return $sb;
+		}
+	}
+
+	return false;
+}
